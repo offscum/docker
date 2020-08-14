@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  mysql:
+    image: 'mysql'
+    restart: always
+    hostname: dzzoffice_mysql
+    privileged: true
+    container_name: dzzoffice_mysql
+    ports:
+      - "13306:3306"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "500m"
+    volumes:
+      - ./mysql/db:/var/lib/mysql:Z
+      - ./mysql/init:/docker-entrypoint-initdb.d:Z
+      - ./mysql/conf/my.cnf:/etc/my.cnf:Z
+    networks:
+      - dzzoffice
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+
+  dzzoffice:
+    image: 'imdevops/dzzoffice'
+    restart: always
+    hostname: dzzoffice_dzzoffice
+    privileged: true
+    container_name: dzzoffice_dzzoffice
+    ports:
+      - "20080:80"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "500m"
+    volumes:
+      - ./dzzoffice/data:/var/www/html/data:Z
+    depends_on:
+      - mysql
+    networks:
+      - dzzoffice
+
+networks:
+  dzzoffice:
